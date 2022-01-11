@@ -94,6 +94,71 @@ class WippImage(WippEntity):
         return str(self)
 
 
+class WippStitchingVector(WippEntity):
+    id: Optional[str]
+    name: str
+    creation_date: Optional[datetime]
+    source_job: Optional[str]
+    pattern: Optional[str]
+    note: Optional[str]
+    number_of_time_slices: Optional[int]
+    tiles_pattern: Optional[str]
+    """Class for holding WIPP Stitching Vector"""
+
+    def __str__(self):
+        return f"{self.id}\t{self.name}"
+
+    def __repr__(self):
+        return str(self)
+
+    def __iter__(self):
+        for sv in self.stitchingVectors:
+            yield sv
+
+
+class WippStitchingVectorTimeSlice(WippEntity):
+    slice_number: int
+    error_message: Optional[str]
+    """Class for holding WIPP Stitiching Vector Time Slice"""
+
+    def __str__(self):
+        return f"{self.slice_number}"
+
+    def __repr__(self):
+        return str(self)
+        
+
+class WippPyramidAnnotation(WippEntity):
+    id: Optional[str]
+    name: str
+    creation_date: Optional[datetime]
+    source_job: Optional[str]
+    note: Optional[str]
+    number_of_time_slices: Optional[int]
+    """Class for holding WIPP Pyramid Annotation"""
+
+    def __str__(self):
+        return f"{self.id}\t{self.name}"
+
+    def __repr__(self):
+        return str(self)
+
+    def __iter__(self):
+        for sv in self.stitchingVectors:
+            yield sv
+
+
+class WippPyramidAnnotationTimeSlice(WippEntity):
+    slice_number: int
+    """Class for holding WIPP Pyramid Annotation Time Slice"""
+
+    def __str__(self):
+        return f"{self.slice_number}"
+
+    def __repr__(self):
+        return str(self)
+
+
 class WippCsvCollection(WippAbstractCollection):
     csv_total_size: Optional[int]
     number_importing_csv: Optional[int]
@@ -335,6 +400,14 @@ class Wipp:
                 key = "csvs"
             elif plural == "genericFile":
                 key = "genericFiles"
+            elif plural == "timeSlices":
+                # key = "stitchingVectorTimeSlices"
+                print('--------------')
+                print(path_prefix)
+                if path_prefix.split("/")[0] == "stitchingVectors":
+                    key = "stitchingVectorTimeSlices"
+                elif path_prefix.split("/")[0] == "pyramidAnnotations":
+                    key = "pyramidAnnotationTimeSlices"
 
             entities_page = r.json()["_embedded"][key]
 
@@ -343,6 +416,15 @@ class Wipp:
                 return [WippImageCollection(**entity) for entity in entities_page]
             elif plural == "images":
                 return [WippImage(**entity) for entity in entities_page]
+            elif plural == "stitchingVectors":
+                return [WippStitchingVector(**entity) for entity in entities_page]
+            elif plural == "pyramidAnnotations":
+                return [WippPyramidAnnotation(**entity) for entity in entities_page]
+            elif plural == "timeSlices":
+                if key == "stitchingVectorTimeSlices":
+                    return [WippStitchingVectorTimeSlice(**entity) for entity in entities_page]
+                if key == "pyramidAnnotationTimeSlices":
+                    return [WippPyramidAnnotationTimeSlice(**entity) for entity in entities_page]
             elif plural == "csvCollections":
                 return [WippCsvCollection(**entity) for entity in entities_page]
             elif plural == "csv":
@@ -417,7 +499,7 @@ class Wipp:
             if plural == "imagesCollections":
                 return WippImageCollection(**entity)
             elif plural == "images":
-                return WippImage(**entity)
+                return WippImage(**entity)    
             elif plural == "csvCollections":
                 return WippCsvCollection(**entity)
             elif plural == "csv":
@@ -702,6 +784,36 @@ class Wipp:
         """Get list of all images in a WIPP Image Collection"""
         return self.get_entities(
             "images", path_prefix="imagesCollections/" + collection_id
+        )
+
+    # Stitching Vector Collection methods
+    def delete_stitching_vector(self, stitching_vector_id: str) -> None:
+        """Delete a WIPP Stitching Vector
+
+        Keyword arguments:
+        stitching_vector_id -- WIPP Stitching Vector id to delete
+        """
+        self.delete_entity("stitchingVectors", stitching_vector_id)
+
+    def get_stitching_vector_time_slices(self, stitching_vector_id: str) -> list[WippStitchingVectorTimeSlice]:
+        """Get list of all time slices in a WIPP Stitching Vector"""
+        return self.get_entities(
+            "timeSlices", path_prefix="stitchingVectors/" + stitching_vector_id
+        )
+
+    # Stitching Vector Collection methods
+    def delete_pyramid_annotation(self, stitching_vector_id: str) -> None:
+        """Delete a WIPP Pyramid Annotation
+
+        Keyword arguments:
+        stitching_vector_id -- WIPP Pyramid Annotation id to delete
+        """
+        self.delete_entity("pyramidAnnotations", stitching_vector_id)
+
+    def get_pyramid_annotation_time_slices(self, pyramid_annotation_id: str) -> list[WippPyramidAnnotationTimeSlice]:
+        """Get list of all time slices in a WIPP Pyramid Annotation"""
+        return self.get_entities(
+            "timeSlices", path_prefix="pyramidAnnotations/" + pyramid_annotation_id
         )
 
     # CSV Collection methods
