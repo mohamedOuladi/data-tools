@@ -112,8 +112,8 @@ class WippStitchingVector(WippEntity):
         return str(self)
 
     def __iter__(self):
-        for sv in self.stitchingVectors:
-            yield sv
+        for svts in self.stitchingVectorTimeSlices:
+            yield svts
 
 
 class WippStitchingVectorTimeSlice(WippEntity):
@@ -144,8 +144,8 @@ class WippPyramidAnnotation(WippEntity):
         return str(self)
 
     def __iter__(self):
-        for sv in self.stitchingVectors:
-            yield sv
+        for pats in self.pyramidAnnotationsTimeSlices:
+            yield pats
 
 
 class WippPyramidAnnotationTimeSlice(WippEntity):
@@ -401,9 +401,6 @@ class Wipp:
             elif plural == "genericFile":
                 key = "genericFiles"
             elif plural == "timeSlices":
-                # key = "stitchingVectorTimeSlices"
-                print('--------------')
-                print(path_prefix)
                 if path_prefix.split("/")[0] == "stitchingVectors":
                     key = "stitchingVectorTimeSlices"
                 elif path_prefix.split("/")[0] == "pyramidAnnotations":
@@ -787,29 +784,13 @@ class Wipp:
         )
 
     # Stitching Vector Collection methods
-    def delete_stitching_vector(self, stitching_vector_id: str) -> None:
-        """Delete a WIPP Stitching Vector
-
-        Keyword arguments:
-        stitching_vector_id -- WIPP Stitching Vector id to delete
-        """
-        self.delete_entity("stitchingVectors", stitching_vector_id)
-
     def get_stitching_vector_time_slices(self, stitching_vector_id: str) -> list[WippStitchingVectorTimeSlice]:
         """Get list of all time slices in a WIPP Stitching Vector"""
         return self.get_entities(
             "timeSlices", path_prefix="stitchingVectors/" + stitching_vector_id
         )
 
-    # Stitching Vector Collection methods
-    def delete_pyramid_annotation(self, stitching_vector_id: str) -> None:
-        """Delete a WIPP Pyramid Annotation
-
-        Keyword arguments:
-        stitching_vector_id -- WIPP Pyramid Annotation id to delete
-        """
-        self.delete_entity("pyramidAnnotations", stitching_vector_id)
-
+    # Pyramid Annotation Collection methods
     def get_pyramid_annotation_time_slices(self, pyramid_annotation_id: str) -> list[WippPyramidAnnotationTimeSlice]:
         """Get list of all time slices in a WIPP Pyramid Annotation"""
         return self.get_entities(
